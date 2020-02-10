@@ -1,0 +1,9 @@
+{
+  "api": {
+    "mapboxgl": {
+      "accessToken": "pk.eyJ1IjoidmlrbHVyZSIsImEiOiJjazV2aHdvN2MwZDV5M2RtZGZ6OTg4dDFxIn0.VRS-mX7GzfnrTqsQO70cUQ",
+      "center": [ 2.8344617, 42.6990297 ],
+      "zoom": 8
+    }
+  }
+}

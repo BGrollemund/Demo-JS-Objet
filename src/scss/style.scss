@@ -1,0 +1,52 @@
+@import url('~mapbox-gl/dist/mapbox-gl.css');
+
+* {
+  border: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  font-family: sans-serif;
+  height: 100vh;
+
+  .cmd-panel {
+    background-color: #e5e5e5;
+    flex-basis: 400px;
+  }
+
+  #map {
+    height: 100vh;
+    flex-grow: 1;
+  }
+
+  #loader {
+    align-items: center;
+    background-color: #bbeeff;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    z-index: 20;
+
+    .loader-spinner {
+      background: url("../assets/img/loader.png") center center no-repeat;
+      width: 400px;
+      height: 400px;
+
+      animation: rotation linear 2000ms infinite;
+    }
+
+    @keyframes rotation {
+      from {
+        transform: rotateZ(0deg);
+      }
+      to {
+        transform: rotateZ(360deg);
+      }
+    }
+  }
+}
