@@ -13,7 +13,53 @@
     </div>
 
     <div class="cmd-panel">
+        <div>
+            <div id="cmd-panel-mask">
+                <div class="text-mask">Choisissez le lieu en cliquant sur la carte</div>
+            </div>
 
+            <h1>Map Event Manager</h1>
+
+            <h2>Ajouter un évènement :</h2>
+            <div>
+                <input type="text" id="event-title" placeholder="Titre de l'évènement">
+                <div id="error-title" class="error"></div>
+
+                <textarea id="event-description" placeholder="Décrivez en quelques mots l'évènement"></textarea>
+                <div id="error-description" class="error"></div>
+
+                <div>
+                    Début de l'évènement :
+                    <div class="input-datetime">
+                        <div>
+                            <input type="date" id="event-date-start">
+                        </div>
+                        <div>
+                            <input type="time" id="event-hour-start" value="12:00">
+                        </div>
+                    </div>
+                    <div id="error-date-start" class="error"></div>
+                </div>
+
+                <div>
+                    Fin de l'évènement :
+                    <div class="input-datetime">
+                        <div>
+                            <input type="date" id="event-date-end">
+                        </div>
+                        <div>
+                            <input type="time" id="event-hour-end" value="12:00">
+                        </div>
+                    </div>
+                    <div id="error-date-end" class="error"></div>
+                </div>
+
+                <div class="btn" id="event-add">➕ Ajouter</div>
+            </div>
+            <div>
+                <div class="btn" id="events-reset">🗑️ Tout supprimer</div>
+            </div>
+        </div>
     </div>
 
     <div id="map"></div>

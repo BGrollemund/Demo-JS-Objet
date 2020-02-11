@@ -11,15 +11,134 @@ body {
   display: flex;
   font-family: sans-serif;
   height: 100vh;
+  position: relative;
+  z-index: 1;
 
   .cmd-panel {
     background-color: #e5e5e5;
     flex-basis: 400px;
+    padding: 13px;
+    position: relative;
+    z-index: 1;
+
+    h1 {
+      margin: 26px;
+      text-decoration: underline;
+    }
+
+    h2 {
+      margin: 13px;
+    }
+
+    input, textarea {
+      display: block;
+      padding: 7px;
+      margin: 3px 0 13px 0;
+      width: 100%;
+    }
+
+    textarea {
+      height: 100px;
+    }
+
+    .btn {
+      background-color: #e8efff;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-bottom: 13px;
+      padding: 7px;
+      width: 50%;
+
+      &:hover {
+        background-color: #d3e5ff;
+      }
+    }
+
+    .error {
+      color: #ff3449;
+      margin-bottom: 7px;
+      margin-top: -7px;
+    }
+
+    .error-field {
+      border: 1px solid #ff3449;
+      border-radius: 3px;
+    }
+
+    .input-datetime {
+      display: flex;
+      justify-content: space-around;
+
+      & div {
+        padding: 0 3px;
+        flex-basis: 50%;
+      }
+    }
+
+    #cmd-panel-mask {
+      display: none;
+      background-color: #e1fffa;
+      height: 100%;
+      left: 0;
+      opacity: 0.8;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+
+    .text-mask {
+      color: #111111;
+      font-size: 32px;
+      font-weight: 700;
+      padding: 13px;
+      transform: translate(0,200px) rotateZ(-45deg) ;
+    }
   }
 
   #map {
     height: 100vh;
     flex-grow: 1;
+
+    .map-marker {
+      cursor: pointer;
+      height: 64px;
+      margin-left: 16px;
+      margin-top: -23px;
+      width: 64px;
+    }
+
+    .flag-red {
+      background-image: url("../assets/img/flag-red.png");
+    }
+
+    .flag-green {
+      background-image: url("../assets/img/flag-green.png");
+    }
+
+    .flag-orange {
+      background-image: url("../assets/img/flag-orange.png");
+    }
+
+    .popup-inner {
+      width: 300px;
+
+      .popup-title {
+        font-size: 24px;
+        font-weight: 700;
+        padding-left: 13px;
+        margin-bottom: 13px;
+      }
+
+      .popup-date {
+        font-style: italic;
+        margin-bottom: 7px;
+      }
+
+      .popup-description {
+        font-size: 16px;
+      }
+    }
   }
 
   #loader {
@@ -30,7 +149,7 @@ body {
     justify-content: center;
     position: absolute;
     width: 100%;
-    z-index: 20;
+    z-index: 10;
 
     .loader-spinner {
       background: url("../assets/img/loader.png") center center no-repeat;
