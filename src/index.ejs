@@ -12,6 +12,11 @@
         <div class="loader-spinner"></div>
     </div>
 
+    <div id="cmd-reload" class="btn-map">🔄</div>
+    <div id="cmd-recenter" class="btn-map"></div>
+    <div id="cmd-satellite" class="btn-map"></div>
+    <div id="cmd-nature" class="btn-map"></div>
+
     <div class="cmd-panel">
         <div>
             <div id="cmd-panel-mask">
@@ -59,6 +64,20 @@
             <div>
                 <div class="btn" id="events-reset">🗑️ Tout supprimer</div>
             </div>
+
+            <hr>
+
+            <h2>Filtrer les évènements :</h2>
+            <div>
+                <input type="checkbox" id="marker-green" checked>Dans plus de 3 jours<br>
+                <input type="checkbox" id="marker-orange" checked>Dans moins de 3 jours<br>
+                <input type="checkbox" id="marker-blue" checked>En cours<br>
+                <input type="checkbox" id="marker-red" checked>Terminé<br>
+
+                <div class="btn" id="events-filter">🧷 Filtrer</div>
+            </div>
+
+            <hr>
         </div>
     </div>
 

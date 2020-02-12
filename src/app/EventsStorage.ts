@@ -1,3 +1,5 @@
+import config from '../../app.config.json';
+
 import EventData from "./EventData";
 
 const localStorageName: string = 'events-storage';
@@ -13,6 +15,12 @@ export default class EventsStorage {
         this.data.push( data );
     }
 
+    fixturesLoad(): void {
+        if( this.data.length <= 0 ) {
+            localStorage.setItem( localStorageName, JSON.stringify( config.fixtures ) );
+        }
+    }
+
     static getFromLocalStorage(): IEventsStorage | null {
         const storageData: string | null = localStorage.getItem( localStorageName );
 
@@ -26,6 +34,11 @@ export default class EventsStorage {
         });
 
         return result;
+    }
+
+    resetLocalStorage(): void {
+        this.data = [];
+        localStorage.removeItem(localStorageName);
     }
 
     saveToLocalStorage(): void {

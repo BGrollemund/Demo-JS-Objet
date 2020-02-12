@@ -2,8 +2,99 @@
   "api": {
     "mapboxgl": {
       "accessToken": "pk.eyJ1IjoidmlrbHVyZSIsImEiOiJjazV2aHdvN2MwZDV5M2RtZGZ6OTg4dDFxIn0.VRS-mX7GzfnrTqsQO70cUQ",
-      "center": [ 2.8344617, 42.6990297 ],
+      "center": [
+        2.8796823,
+        42.6962545
+      ],
       "zoom": 8
     }
+  },
+  "fixtures": {
+    "data": [
+      {
+        "title": "Festival Photo Journalisme",
+        "description": "Venez admirez nos superbes photos! Gratuit pour les enfants.",
+        "date_start": "2020-09-06T10:00:00.000Z",
+        "date_end": "2020-09-30T16:00:00.000Z",
+        "lngLat": {"lng": 2.8960914909143867, "lat": 42.69379209212818}
+      },
+      {
+        "title": "Trophée Andorre Ski",
+        "description": "Le gratin du ski alpin est réuni pour remporter cette 14ème étape de la Coupe du Monde de Ski. Venez profiter de l'air pur et de la bonne humeur de la principauté.",
+        "date_start": "2020-02-14T08:00:00.000Z",
+        "date_end": "2020-02-16T13:00:00.000Z",
+        "lngLat": {"lng": 1.5172875965440369, "lat": 42.54254964027382}
+      },
+      {
+        "title": "Pèche au Calamar",
+        "description": "Venez pêcher le calamar avec l'Amicale des Céphalopodes Fisher's. Possibilités de réserver une place dans un de nos bateaux écoles.",
+        "date_start": "2020-02-03T07:00:00.000Z",
+        "date_end": "2020-02-09T18:00:00.000Z",
+        "lngLat": {"lng": 3.1306358619939942, "lat": 42.59967673393788}
+      },
+      {
+        "title": "Aprem Paddle",
+        "description": "Venez apprendre et perfectionner votre maniement du paddle.",
+        "date_start": "2020-02-29T13:00:00.000Z",
+        "date_end": "2020-02-29T16:00:00.000Z",
+        "lngLat": {"lng": 2.8103582855843854, "lat": 42.513653051205466}
+      },
+      {
+        "title": "Visite Collioure",
+        "description": "Visite de Collioure de la maison de retraite \"les flots bleus\"",
+        "date_start": "2020-02-03T13:00:00.000Z",
+        "date_end": "2020-02-07T19:00:00.000Z",
+        "lngLat": {"lng": 3.0849022261654397, "lat": 42.52671154924832}
+      },
+      {
+        "title": "Triathlon de Villeneuve",
+        "description": "Parcours santé et course amateur au lac de Villeneuve de la Raho.",
+        "date_start": "2020-02-13T07:00:00.000Z",
+        "date_end": "2020-02-13T14:00:00.000Z",
+        "lngLat": {"lng": 2.90456164600144, "lat": 42.64072522815215}
+      },
+      {
+        "title": "Plongée sous-marine",
+        "description": "Le superbe panorama de Cadaqués servira de toile de fond alors que vous admirerez la vie sous-marine de la côte Vermeille.",
+        "date_start": "2020-02-18T06:00:00.000Z",
+        "date_end": "2020-02-18T19:00:00.000Z",
+        "lngLat": {"lng": 3.285570817213795, "lat": 42.285799776018905}
+      },
+      {
+        "title": "Balade en raquette",
+        "description": "Superbes balades autour des lacs de Bouillouses. Venez découvrir la marche en raquettes!",
+        "date_start": "2020-01-31T15:00:00.000Z",
+        "date_end": "2020-02-02T15:00:00.000Z",
+        "lngLat": {"lng": 2.001879928682314, "lat": 42.5592002161093}
+      },
+      {
+        "title": "Animation Permaculture",
+        "description": "Pendant une semaine, venez découvrir les astuces qui vous permettront de cultiver toute l'année des légumes savoureux tout en respectant la planète!",
+        "date_start": "2020-02-24T07:00:00.000Z",
+        "date_end": "2020-02-28T17:00:00.000Z",
+        "lngLat": {"lng": 2.5110419517018556, "lat": 42.615348414991075}
+      },
+      {
+        "title": "Les Bains Chaud",
+        "description": "Pendant tout le mois de mars, les bains chauds de St Thomas seront ouverts. Aimez les chauds!",
+        "date_start": "2020-03-01T11:00:00.000Z",
+        "date_end": "2020-03-31T16:00:00.000Z",
+        "lngLat": {"lng": 2.1677027419583226, "lat": 42.504463871895524}
+      },
+      {
+        "title": "Randonnée du Canigou",
+        "description": "Les \"Marcheurs Fous\" organisent trois jours autour du Pic du Canigou.",
+        "date_start": "2020-02-09T11:00:00.000Z",
+        "date_end": "2020-02-22T13:00:00.000Z",
+        "lngLat": {"lng": 2.457152560540237, "lat": 42.51825789210599}
+      },
+      {
+        "title": "Visite viticole",
+        "description": "Visite des caves où murissent les Muscat de Rivesates.",
+        "date_start": "2020-02-13T12:00:00.000Z",
+        "date_end": "2020-02-15T15:00:00.000Z",
+        "lngLat": {"lng": 2.8723078834711373, "lat": 42.76827333100408}
+      }
+    ]
   }
 }

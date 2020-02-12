@@ -30,11 +30,21 @@ body {
       margin: 13px;
     }
 
+    hr {
+      border: 3px solid #111111;
+      margin: 23px 0;
+    }
+
     input, textarea {
       display: block;
       padding: 7px;
       margin: 3px 0 13px 0;
       width: 100%;
+    }
+
+    input[type = "checkbox" ] {
+      display: inline;
+      width: 20%;
     }
 
     textarea {
@@ -46,6 +56,7 @@ body {
       border-radius: 3px;
       cursor: pointer;
       margin-bottom: 13px;
+      margin-left: 25%;
       padding: 7px;
       width: 50%;
 
@@ -96,6 +107,56 @@ body {
     }
   }
 
+  .btn-map {
+    border: 2px solid #ff4528;
+    border-radius: 3px;
+    cursor: pointer;
+    height: 80px;
+    position: absolute;
+    width: 80px;
+    z-index: 2;
+  }
+
+  #cmd-reload {
+    border: none;
+    bottom: 50px;
+    font-size: 48px;
+    height: 50px;
+    right: 50px;
+    width: 50px;
+  }
+
+  #cmd-recenter {
+    background: url("../assets/img/POlogo.png") center center no-repeat;
+    top: 50px;
+    left: 450px;
+  }
+
+  #cmd-nature {
+    background: url("../assets/img/nature.png") center center no-repeat;
+    top: 50px;
+    left: 650px;
+  }
+
+  #cmd-satellite {
+    background: url("../assets/img/satellite.png") center center no-repeat;
+    top: 50px;
+    left: 550px;
+  }
+
+  #cmd-satellite {
+    background: url("../assets/img/satellite.png") center center no-repeat;
+    border: 2px solid #ff4528;
+    border-radius: 3px;
+    position: absolute;
+    top: 50px;
+    cursor: pointer;
+    height: 80px;
+    left: 550px;
+    width: 80px;
+    z-index: 2;
+  }
+
   #map {
     height: 100vh;
     flex-grow: 1;
@@ -106,6 +167,10 @@ body {
       margin-left: 16px;
       margin-top: -23px;
       width: 64px;
+    }
+
+    .flag-blue {
+      background-image: url("../assets/img/flag-blue.png");
     }
 
     .flag-red {
@@ -121,7 +186,48 @@ body {
     }
 
     .popup-inner {
-      width: 300px;
+      min-height: 200px;
+      padding: 13px;
+      width: 400px;
+
+      .btns-popup {
+        display: flex;
+        justify-content: space-around;
+        margin: 13px;
+
+        .btn-popup {
+          background-color: #e8efff;
+          cursor: pointer;
+          font-size: 24px;
+          text-align: center;
+          height: 40px;
+          width: 40px;
+
+          & > * {
+            display: inline-block;
+            vertical-align: middle;
+          }
+
+          &::before {
+            display: inline-block;
+            vertical-align: middle;
+            content: '';
+            height: 100%;
+            width: 0;
+          }
+
+          &:hover {
+            background-color: #d3e5ff;
+          }
+        }
+      }
+
+      .popup-alert {
+        color: #ff4528;
+        font-size: 14px;
+        font-style: italic;
+        margin-bottom: 7px;
+      }
 
       .popup-title {
         font-size: 24px;
@@ -137,6 +243,7 @@ body {
 
       .popup-description {
         font-size: 16px;
+        text-wrap: normal;
       }
     }
   }
