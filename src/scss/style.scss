@@ -14,7 +14,7 @@ body {
   position: relative;
   z-index: 1;
 
-  .cmd-panel {
+  #cmd-panel {
     background-color: #e5e5e5;
     flex-basis: 400px;
     padding: 13px;
@@ -65,7 +65,12 @@ body {
       }
     }
 
-    .error {
+    .hidden {
+      display: none;
+    }
+
+    .error,
+    #position-msg {
       color: #ff3449;
       margin-bottom: 7px;
       margin-top: -7px;
@@ -107,54 +112,41 @@ body {
     }
   }
 
-  .btn-map {
-    border: 2px solid #ff4528;
+  #cmd-map {
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 3px;
-    cursor: pointer;
-    height: 80px;
-    position: absolute;
-    width: 80px;
-    z-index: 2;
-  }
-
-  #cmd-reload {
-    border: none;
-    bottom: 50px;
-    font-size: 48px;
-    height: 50px;
-    right: 50px;
-    width: 50px;
-  }
-
-  #cmd-recenter {
-    background: url("../assets/img/POlogo.png") center center no-repeat;
-    top: 50px;
+    display: flex;
+    justify-content: space-around;
     left: 450px;
-  }
-
-  #cmd-nature {
-    background: url("../assets/img/nature.png") center center no-repeat;
-    top: 50px;
-    left: 650px;
-  }
-
-  #cmd-satellite {
-    background: url("../assets/img/satellite.png") center center no-repeat;
-    top: 50px;
-    left: 550px;
-  }
-
-  #cmd-satellite {
-    background: url("../assets/img/satellite.png") center center no-repeat;
-    border: 2px solid #ff4528;
-    border-radius: 3px;
+    padding: 13px;
     position: absolute;
     top: 50px;
-    cursor: pointer;
-    height: 80px;
-    left: 550px;
-    width: 80px;
+    width: 400px;
     z-index: 2;
+
+    .btn-map {
+      border: 2px solid #ff4528;
+      border-radius: 3px;
+      cursor: pointer;
+      height: 80px;
+      width: 80px;
+    }
+
+    .cmd-nature {
+      background: url("../assets/img/nature.png") center center no-repeat;
+    }
+
+    .cmd-recenter {
+      background: url("../assets/img/POlogo.png") center center no-repeat;
+    }
+
+    .cmd-reload {
+      background: url("../assets/img/reload.png") center center no-repeat;
+    }
+
+    .cmd-satellite {
+      background: url("../assets/img/satellite.png") center center no-repeat;
+    }
   }
 
   #map {
@@ -185,7 +177,7 @@ body {
       background-image: url("../assets/img/flag-orange.png");
     }
 
-    .popup-inner {
+    #popup-inner {
       min-height: 200px;
       padding: 13px;
       width: 400px;
@@ -193,7 +185,7 @@ body {
       .btns-popup {
         display: flex;
         justify-content: space-around;
-        margin: 13px;
+        margin: 26px 13px 0 13px;
 
         .btn-popup {
           background-color: #e8efff;

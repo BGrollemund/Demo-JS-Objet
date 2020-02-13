@@ -1,170 +1,221 @@
 import config from '../../app.config.json';
 
 import jQuery from 'jquery';
-import mapboxgl, {LngLatLike, Map, MapboxOptions, Marker, Popup} from "mapbox-gl";
+const $: JQueryStatic = jQuery;
+
+import mapboxgl, {LngLatLike, Map, MapboxOptions, MapMouseEvent, Marker, Popup} from "mapbox-gl";
 
 import EventsStorage from "./EventsStorage";
 import EventData from "./EventData";
 import IColoredMarker from "./IColoredMarker";
-
-const $: JQueryStatic = jQuery;
+import formFieldsManager from "./FormFieldsManager";
 
 class App {
-    // Boutons tableaux de commandes
-    public $eventAdd: JQuery;
-    public $eventsReset: JQuery;
-    public $eventsFilter: JQuery;
-
-    // Champs Formulaires: ajout évènement
-    public $eventTitle: JQuery;
-    public $errorTitle: JQuery;
-    public $eventDescription: JQuery;
-    public $errorDescription: JQuery;
-    public $eventDateStart: JQuery;
-    public $eventTimeStart: JQuery;
-    public $errorDateStart: JQuery;
-    public $eventDateEnd: JQuery;
-    public $eventTimeEnd: JQuery;
-    public $errorDateEnd: JQuery;
-
-    // Champs Filtres: marqueurs selon la couleur
-    public $markerGreen: JQuery;
-    public $markerOrange: JQuery;
-    public $markerBlue: JQuery;
-    public $markerRed: JQuery;
-
-    // Masques
+    public $cmdPanel: JQuery;
+    public $cmdMap: JQuery;
     public $cmdPanelMask: JQuery;
     public $loader: JQuery;
+    public $positionMsg: JQuery;
 
-    // Boutons carte
-    public $cmdNature: JQuery;
-    public $cmdReload: JQuery;
-    public $cmdRecenter: JQuery;
-    public $cmdSatellite: JQuery;
-
-
+    public currentMarkerIndex: number;
+    public currentMarkerPosition: LngLatLike;
     public eventsStorage: EventsStorage;
     public map: Map;
     public newEvent: EventData;
     public placeMarkers: IColoredMarker[];
 
     constructor() {
-        this.$eventAdd = $( '#event-add' );
-        this.$eventsFilter = $( '#events-filter' );
-        this.$eventsReset = $( '#events-reset' );
-
-        this.$eventTitle = $( '#event-title' );
-        this.$errorTitle = $('#error-title');
-        this.$eventDescription = $( '#event-description' );
-        this.$errorDescription = $( '#error-description' );
-        this.$eventDateStart = $( '#event-date-start' );
-        this.$eventTimeStart = $( '#event-hour-start' );
-        this.$errorDateStart = $('#error-date-start');
-        this.$eventDateEnd = $( '#event-date-end' );
-        this.$eventTimeEnd = $ ( '#event-hour-end' );
-        this.$errorDateEnd = $('#error-date-end');
-
-        this.$markerGreen = $( '#marker-green' );
-        this.$markerOrange = $( '#marker-orange' );
-        this.$markerBlue = $( '#marker-blue' );
-        this.$markerRed = $( '#marker-red' );
-
+        this.$cmdPanel = $('#cmd-panel');
+        this.$cmdMap = $( '#cmd-map' );
         this.$cmdPanelMask = $( '#cmd-panel-mask' );
         this.$loader = $( '#loader' );
-
-        this.$cmdNature = $( '#cmd-nature' );
-        this.$cmdReload = $( '#cmd-reload' );
-        this.$cmdRecenter = $( '#cmd-recenter' );
-        this.$cmdSatellite = $( '#cmd-satellite' );
+        this.$positionMsg = $( '#position-msg' );
 
         this.eventsStorage = new EventsStorage( EventsStorage.getFromLocalStorage() );
         this.placeMarkers = [];
     }
 
     start(): void {
-        // Chargement des fixtures
+        // Load fixtures
         this.eventsStorage.fixturesLoad();
         this.eventsStorage = new EventsStorage( EventsStorage.getFromLocalStorage() );
 
+        // Initialize map and listeners
         this.initMap();
-        this.$eventAdd.on( 'click', this.onAddEvent.bind( this ) );
-        this.$eventsReset.on( 'click', this.onResetEvents.bind( this ) );
-        this.$eventsFilter.on( 'click', this.onFilterEvents.bind( this ) );
-
-        this.$cmdNature.on( 'click', this.onNatureMap.bind(this) );
-        this.$cmdReload.on( 'click', this.onReloadMarkers.bind(this) );
-        this.$cmdRecenter.on( 'click', this.onRecenterMap.bind(this) );
-        this.$cmdSatellite.on( 'click', this.onSatelliteMap.bind(this) );
+        this.$cmdPanel.on( 'click', this.onCmdPanel.bind( this ) );
+        this.$cmdMap.on( 'click', this.onCmdMap.bind(this) );
     }
 
-    checkAddEventFields( newTitle: string, newDescription: string, newDateStart: string, newDateEnd: string ): boolean {
-        let result: boolean = true;
+    // ---- Commands panel ---- //
 
-        if( !newTitle ) {
-            this.$errorTitle.text('Rentrez un titre');
-            this.$eventTitle.addClass('error-field');
-            result = false;
-        }
-        else {
-            this.$errorTitle.text('');
-            this.$eventTitle.removeClass('error-field');
-        }
+    /**
+     * Command panel manager listener
+     *
+     * @param event
+     */
+    onCmdPanel( event: MouseEvent ): void {
+        const eventTarget: HTMLDivElement = event.target as HTMLDivElement;
 
-        if( !newDescription ) {
-            this.$errorDescription.text('Rentrez une description');
-            this.$eventDescription.addClass('error-field');
-            result = false;
-        }
-        else {
-            this.$errorDescription.text('');
-            this.$eventDescription.removeClass('error-field');
-        }
-
-        if( !newDateStart ) {
-            this.$errorDateStart.text('Rentrez la date de début');
-            this.$eventDateStart.addClass('error-field');
-            result = false;
-        }
-        else {
-            this.$errorDateStart.text('');
-            this.$eventDateStart.removeClass('error-field');
-        }
-
-        if( !newDateEnd ) {
-            this.$errorDateEnd.text('Rentrez la date de fin');
-            this.$eventDateEnd.addClass('error-field');
-            result = false;
-        }
-        else {
-            this.$errorDateEnd.text('');
-            this.$eventDateEnd.removeClass('error-field');
-        }
-
-        return result;
+        if( eventTarget.classList.contains('event-add') ) this.onAddEvent();
+        if( eventTarget.classList.contains('event-edit') ) this.onEditEvent();
+        if( eventTarget.classList.contains('event-edit-position') ) this.onEditEventPosition();
+        if( eventTarget.classList.contains('events-reset') ) this.onResetEvents();
+        if( eventTarget.classList.contains('events-filter') ) this.onFilterEvents();
     }
 
-    checkAddEventDates( newDateStart: Date, newDateEnd: Date ): boolean {
-        let result: number = newDateEnd.getTime() - newDateStart.getTime();
+    // Add event
 
-        if( result < 0 ) {
-            this.$errorDateEnd.text('Les dates ne sont pas bonnes');
-            this.$eventDateStart.addClass('error-field');
-            this.$eventTimeStart.addClass('error-field');
-            this.$eventDateEnd.addClass('error-field');
-            this.$eventTimeEnd.addClass('error-field');
-            return false;
-        }
-        else {
-            this.$errorDateEnd.text('');
-            this.$eventDateStart.removeClass('error-field');
-            this.$eventTimeStart.removeClass('error-field');
-            this.$eventDateEnd.removeClass('error-field');
-            this.$eventTimeEnd.removeClass('error-field');
-            return true;
+    /**
+     * Create a new EventData from form data (without position)
+     *
+     * @return EventData | null
+     */
+    createEventFromFormData(): EventData | null {
+        const
+            newTitle = formFieldsManager.$eventTitle.val() as string,
+            newDescription = formFieldsManager.$eventDescription.val() as string,
+            newDateStartString = formFieldsManager.$eventDateStart.val() as string,
+            newDateEndString = formFieldsManager.$eventDateEnd.val() as string;
+
+        if( ! formFieldsManager.checkAddEventFields( newTitle, newDescription, newDateStartString, newDateEndString ) ) return null;
+
+        const
+            newDateStart = new Date( newDateStartString ) as Date,
+            newTimeStart = formFieldsManager.$eventTimeStart.val() as string,
+            arrTimeStart = newTimeStart.split(':') as Array<string>,
+            newDateEnd = new Date( newDateEndString as string ) as Date,
+            newTimeEnd = formFieldsManager.$eventTimeEnd.val() as string,
+            arrTimeEnd = newTimeEnd.split(':') as Array<string>;
+
+        newDateStart.setHours(
+            parseInt( arrTimeStart[0], 10 ),
+            parseInt( arrTimeStart[1], 10 )
+        );
+        newDateEnd.setHours(
+            parseInt( arrTimeEnd[0], 10 ),
+            parseInt( arrTimeEnd[1], 10 )
+        );
+
+        if( ! formFieldsManager.checkAddEventDates( newDateStart, newDateEnd ) ) return null;
+
+        return new EventData(
+            newTitle,
+            newDescription,
+            newDateStart,
+            newDateEnd
+        );
+    }
+
+    /**
+     * Add event infos listener
+     */
+    onAddEvent(): void {
+        const newEvent: EventData | null = this.createEventFromFormData();
+
+        if( ! newEvent ) return;
+
+        this.newEvent = newEvent;
+
+        this.$cmdPanelMask.show();
+        this.map.once( 'click', this.onAddEventMapPick.bind(this) );
+    }
+
+    /**
+     * Add event position listener by picking postion on map
+     *
+     * @param event
+     */
+    onAddEventMapPick( event: MapMouseEvent ): void {
+        this.newEvent.lngLat = event.lngLat;
+
+        this.eventsStorage.add( this.newEvent );
+        this.eventsStorage.saveToLocalStorage();
+        this.renderMarker( this.newEvent );
+
+        formFieldsManager.resetAddEventFields();
+        this.$cmdPanelMask.hide();
+    }
+
+    /**
+     * Edit event listener
+     */
+    onEditEvent(): void {
+        const editEvent: EventData | null = this.createEventFromFormData();
+
+        if( ! editEvent ) return;
+
+        editEvent.lngLat = this.currentMarkerPosition;
+
+        this.eventsStorage.editByIndex( this.currentMarkerIndex, editEvent );
+        this.eventsStorage.saveToLocalStorage();
+        this.placeMarkers[this.currentMarkerIndex].marker.remove();
+        this.renderMarker( editEvent );
+        formFieldsManager.resetAddEventFields();
+        $('.add').show();
+        $('.edit').hide();
+        this.$positionMsg.text('');
+    }
+
+    /**
+     * Edit event position listener
+     */
+    onEditEventPosition(): void {
+        this.$cmdPanelMask.show();
+        this.map.once( 'click', this.onEditEventPositionMapPick.bind(this) );
+    }
+
+    /**
+     * Pick position on map and put in currentMarkerPosition
+     *
+     * @param event
+     */
+    onEditEventPositionMapPick( event: MapMouseEvent ): void {
+        this.currentMarkerPosition = event.lngLat;
+        this.$positionMsg.text('Vous avez changé la position, appuyez sur "Editer" pour confirmer.');
+        this.$cmdPanelMask.hide();
+    }
+
+    // Reset events
+
+    /**
+     * Reset events listener
+     */
+    onResetEvents(): void {
+        this.eventsStorage.reset();
+        for( let coloredMarker of this.placeMarkers ) {
+            coloredMarker.marker.remove();
         }
     }
 
+    // Filter events
+
+    /**
+     * Filter events by marker color listener
+     */
+    onFilterEvents(): void {
+        const
+            markerGreen = formFieldsManager.$markerGreen.is(':checked'),
+            markerOrange = formFieldsManager.$markerOrange.is(':checked'),
+            markerBlue = formFieldsManager.$markerBlue.is(':checked'),
+            markerRed = formFieldsManager.$markerRed.is(':checked');
+
+        for( let eventData of this.eventsStorage.data ) {
+            this.renderMarker( eventData );
+        }
+
+        for( let coloredMarker of this.placeMarkers ) {
+            if( !markerGreen && coloredMarker.color === 'green' ) coloredMarker.marker.remove();
+            if( !markerOrange && coloredMarker.color === 'orange' ) coloredMarker.marker.remove();
+            if( !markerBlue && coloredMarker.color === 'blue' ) coloredMarker.marker.remove();
+            if( !markerRed && coloredMarker.color === 'red' ) coloredMarker.marker.remove();
+        }
+    }
+
+    // ---- Map ---- //
+
+    /**
+     * Init map
+     */
     initMap(): void {
         const mapOptions: MapboxOptions = {
             center: config.api.mapboxgl.center as LngLatLike,
@@ -178,6 +229,128 @@ class App {
         this.map.on('load', this.onMapLoad.bind(this));
     }
 
+    /**
+     * Command map manager listener
+     *
+     * @param event
+     */
+    onCmdMap( event: MouseEvent ): void {
+        const eventTarget: HTMLDivElement = event.target as HTMLDivElement;
+
+        if( eventTarget.classList.contains('cmd-reload') ) this.onReloadMarkers();
+        if( eventTarget.classList.contains('cmd-recenter') ) this.onRecenterMap();
+        if( eventTarget.classList.contains('cmd-satellite') ) this.onSatelliteMap();
+        if( eventTarget.classList.contains('cmd-nature') ) this.onNatureMap();
+    }
+
+    /**
+     * Change style map in natural style
+     */
+    onNatureMap(): void {
+        this.$loader.show();
+        this.map.setStyle( 'mapbox://styles/mapbox/outdoors-v11' );
+        this.map.on('idle', () => this.$loader.fadeOut() );
+    }
+
+    /**
+     * Center map on initial center and zoom (available in config)
+     */
+    onRecenterMap(): void {
+        this.map.setCenter( [ config.api.mapboxgl.center[0], config.api.mapboxgl.center[1] ] );
+        this.map.setZoom( config.api.mapboxgl.zoom );
+    }
+
+    /**
+     * Reload markers (possible change in markers color)
+     */
+    onReloadMarkers(): void {
+        for( let coloredMarker of this.placeMarkers ) {
+            coloredMarker.marker.remove();
+        }
+
+        for( let eventData of this.eventsStorage.data ) {
+            this.renderMarker( eventData );
+        }
+    }
+
+    /**
+     * Change style map in satellite style
+     */
+    onSatelliteMap(): void {
+        this.$loader.show();
+        this.map.setStyle( 'mapbox://styles/mapbox/satellite-streets-v11' );
+        this.map.on('idle', () => this.$loader.fadeOut() );
+    }
+
+    /**
+     * Add markers on map
+     */
+    onMapLoad(): void {
+        this.map.resize();
+
+        for( let eventData of this.eventsStorage.data ) {
+            this.renderMarker( eventData );
+        }
+        this.$loader.fadeOut();
+    }
+
+    /**
+     * Display a marker
+     *
+     * @param eventData
+     */
+    renderMarker( eventData: EventData ): void {
+        const
+            popup: Popup = new mapboxgl.Popup({
+                className: 'map-popup',
+                maxWidth: '400px',
+                offset: 50
+            }),
+            dateString: string = ' du '
+                + EventData.getProperDate(eventData.date_start) + ' au '
+                + EventData.getProperDate(eventData.date_end),
+            titleFull: string = eventData.title + dateString,
+            infosMarker = this.findMarkerInfosByDate( eventData );
+
+        popup.setHTML(`
+            <div id="popup-inner">
+                <div class="popup-alert">${ infosMarker[1] }</div>
+                <div class="popup-title">${ eventData.title }</div>
+                <div class="popup-date">${ dateString }</div>
+                <div class="popup-description">${eventData.description}</div>
+                <div class="btns-popup">
+                    <div class="btn-popup edit" id="event-edit"><span class="edit">🖊️</span></div>
+                    <div class="btn-popup delete" id="event-delete"><span class="delete">❌</span></div>
+                </div>
+            </div>
+        `);
+
+        const $marker: JQuery = $( `<div class="map-marker flag-${ infosMarker[0] }" title="${ titleFull }">` );
+        const marker: Marker = new mapboxgl.Marker({
+            element: $marker.get(0)
+        });
+
+        marker
+            .setLngLat( eventData.lngLat )
+            .setPopup( popup )
+            .addTo( this.map as Map );
+
+        this.placeMarkers.push( {
+            marker: marker,
+            color: infosMarker[0]
+        });
+
+        popup.on('open', this.onPopupOpen.bind( this, marker ));
+    }
+
+    /**
+     * Find infos to add on a marker
+     * result[0]: color
+     * result[1]: info message
+     *
+     * @param eventData
+     * @return Array<string>
+     */
     findMarkerInfosByDate( eventData: EventData ): Array<string> {
         let result = [];
 
@@ -213,172 +386,51 @@ class App {
         return result;
     }
 
-    renderMarker( eventData: EventData ): void {
-        const
-            popup: Popup = new mapboxgl.Popup({
-                className: 'map-popup',
-                maxWidth: '400px',
-                offset: 50
-            }),
-            dateString: string = ' du '
-                + EventData.getProperDate(eventData.date_start) + ' au '
-                + EventData.getProperDate(eventData.date_end),
-            titleFull: string = eventData.title + dateString,
-            infosMarker = this.findMarkerInfosByDate( eventData );
+    /**
+     * Add listeners on popup (edit and delete event) when is open
+     *
+     * @param marker
+     */
+    onPopupOpen( marker: Marker ): void {
+        const $popupInner: JQuery = $('#popup-inner');
 
-        popup.setHTML(`
-            <div class="popup-inner">
-                <div class="popup-alert">${ infosMarker[1] }</div>
-                <div class="popup-title">${ eventData.title }</div>
-                <div class="popup-date">${ dateString }</div>
-                <div class="popup-description">${eventData.description}</div>
-                <div class="btns-popup">
-                    <div class="btn-popup" id="event-edit"><span>🖊️</span></div>
-                    <div class="btn-popup" id="event-delete"><span>❌</span></div>
-                </div>
-            </div>
-        `);
-
-        const $marker: JQuery = $( `<div class="map-marker flag-${ infosMarker[0] }" title="${ titleFull }">` );
-        const marker: Marker = new mapboxgl.Marker({
-            element: $marker.get(0)
-        });
-
-        marker
-            .setLngLat( eventData.lngLat )
-            .setPopup( popup )
-            .addTo( this.map as Map );
-
-        this.placeMarkers.push( {
-                marker: marker,
-                color: infosMarker[0]
-            });
+        $popupInner.on('click', this.onCmdPopup.bind(this, marker));
     }
 
-    onAddEvent(): void {
-        const
-            newTitle = this.$eventTitle.val() as string,
-            newDescription = this.$eventDescription.val() as string,
-            newDateStartString = this.$eventDateStart.val() as string,
-            newDateEndString = this.$eventDateEnd.val() as string;
+    /**
+     * Command popup manager listener
+     *
+     * @param marker
+     * @param event
+     */
+    onCmdPopup( marker: Marker, event: MouseEvent ) {
+        const eventTarget: HTMLDivElement = event.target as HTMLDivElement;
 
-        if( ! this.checkAddEventFields( newTitle, newDescription, newDateStartString, newDateEndString ) ) return;
-
-        const
-            newDateStart = new Date( newDateStartString ) as Date,
-            newTimeStart = this.$eventTimeStart.val() as string,
-            arrTimeStart = newTimeStart.split(':') as Array<string>,
-            newDateEnd = new Date( newDateEndString as string ) as Date,
-            newTimeEnd = this.$eventTimeEnd.val() as string,
-            arrTimeEnd = newTimeEnd.split(':') as Array<string>;
-
-        newDateStart.setHours(
-            parseInt( arrTimeStart[0], 10 ),
-            parseInt( arrTimeStart[1], 10 )
-        );
-        newDateEnd.setHours(
-            parseInt( arrTimeEnd[0], 10 ),
-            parseInt( arrTimeEnd[1], 10 )
-        );
-
-        if( !this.checkAddEventDates( newDateStart, newDateEnd ) ) return;
-
-        this.newEvent = new EventData(
-            newTitle,
-            newDescription,
-            newDateStart,
-            newDateEnd
-        );
-
-        this.$cmdPanelMask.show();
-        this.map.once( 'click', this.onAddEventMapPick.bind(this) );
-    }
-
-    onAddEventMapPick( event: any ): void {
-        this.newEvent.lngLat = {
-            lng: event.lngLat.lng,
-            lat: event.lngLat.lat
-        };
-
-        this.eventsStorage.add( this.newEvent );
-        this.eventsStorage.saveToLocalStorage();
-        this.renderMarker( this.newEvent );
-
-        delete this.newEvent;
-
-        this.resetFormFields();
-        this.$cmdPanelMask.hide();
-    }
-
-    onFilterEvents(): void {
-        const
-            markerGreen = this.$markerGreen.is(':checked'),
-            markerOrange = this.$markerOrange.is(':checked'),
-            markerBlue = this.$markerBlue.is(':checked'),
-            markerRed = this.$markerRed.is(':checked');
-
-        for( let eventData of this.eventsStorage.data ) {
-            this.renderMarker( eventData );
+        if( eventTarget.classList.contains('delete') ) {
+            for( let i=0; i<this.placeMarkers.length; i++ ) {
+                if( this.placeMarkers[i].marker === marker ) {
+                    this.placeMarkers.splice( i, 1 );
+                    this.eventsStorage.deleteByIndex( i );
+                    this.eventsStorage.saveToLocalStorage();
+                    marker.remove();
+                    return;
+                }
+            }
         }
 
-        for( let coloredMarker of this.placeMarkers ) {
-            if( !markerGreen && coloredMarker.color === 'green' ) coloredMarker.marker.remove();
-            if( !markerOrange && coloredMarker.color === 'orange' ) coloredMarker.marker.remove();
-            if( !markerBlue && coloredMarker.color === 'blue' ) coloredMarker.marker.remove();
-            if( !markerRed && coloredMarker.color === 'red' ) coloredMarker.marker.remove();
+        if( eventTarget.classList.contains('edit') ) {
+            for( let i=0; i<this.placeMarkers.length; i++ ) {
+                if( this.placeMarkers[i].marker === marker ) {
+                    marker.togglePopup();
+                    $('.add').hide();
+                    $('.edit').show();
+                    formFieldsManager.setEditEventFields(this.eventsStorage.data[i]);
+                    this.currentMarkerIndex = i;
+                    this.currentMarkerPosition = this.eventsStorage.data[i].lngLat;
+                    return;
+                }
+            }
         }
-    }
-
-    onMapLoad(): void {
-        this.map.resize();
-
-        for( let eventData of this.eventsStorage.data ) {
-            this.renderMarker( eventData );
-        }
-        this.$loader.fadeOut();
-    }
-
-    onNatureMap(): void {
-        this.$loader.show();
-        this.map.setStyle( 'mapbox://styles/mapbox/outdoors-v11' );
-        this.map.on('idle', () => this.$loader.fadeOut() );
-    }
-
-    onRecenterMap(): void {
-        this.map.setCenter( [ config.api.mapboxgl.center[0], config.api.mapboxgl.center[1] ] );
-        this.map.setZoom( config.api.mapboxgl.zoom );
-    }
-
-    onSatelliteMap(): void {
-        this.$loader.show();
-        this.map.setStyle( 'mapbox://styles/mapbox/satellite-streets-v11' );
-        this.map.on('idle', () => this.$loader.fadeOut() );
-    }
-
-    onReloadMarkers(): void {
-        for( let coloredMarker of this.placeMarkers ) {
-            coloredMarker.marker.remove();
-        }
-
-        for( let eventData of this.eventsStorage.data ) {
-            this.renderMarker( eventData );
-        }
-    }
-
-    onResetEvents(): void {
-        this.eventsStorage.resetLocalStorage();
-        for( let coloredMarker of this.placeMarkers ) {
-            coloredMarker.marker.remove();
-        }
-    }
-
-    resetFormFields() {
-        this.$eventTitle.val( '' );
-        this.$eventDescription.val( '' );
-        this.$eventDateStart.val( '' );
-        this.$eventTimeStart.val('12:00');
-        this.$eventDateEnd.val( '' );
-        this.$eventTimeEnd.val('12:00');
     }
 }
 

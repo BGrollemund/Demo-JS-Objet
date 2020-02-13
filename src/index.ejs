@@ -12,20 +12,23 @@
         <div class="loader-spinner"></div>
     </div>
 
-    <div id="cmd-reload" class="btn-map">🔄</div>
-    <div id="cmd-recenter" class="btn-map"></div>
-    <div id="cmd-satellite" class="btn-map"></div>
-    <div id="cmd-nature" class="btn-map"></div>
+    <div id="cmd-map">
+        <div class="btn-map cmd-reload"></div>
+        <div class="btn-map cmd-recenter"></div>
+        <div class="btn-map cmd-satellite"></div>
+        <div class="btn-map cmd-nature"></div>
+    </div>
 
-    <div class="cmd-panel">
+    <div id="cmd-panel">
         <div>
             <div id="cmd-panel-mask">
                 <div class="text-mask">Choisissez le lieu en cliquant sur la carte</div>
             </div>
 
-            <h1>Map Event Manager</h1>
+            <h1 class="hidden">Map Event Manager</h1>
 
-            <h2>Ajouter un évènement :</h2>
+            <h2 class="add">Ajouter un évènement :</h2>
+            <h2 class="edit hidden">Editer l'évènement</h2>
             <div>
                 <input type="text" id="event-title" placeholder="Titre de l'évènement">
                 <div id="error-title" class="error"></div>
@@ -59,10 +62,13 @@
                     <div id="error-date-end" class="error"></div>
                 </div>
 
-                <div class="btn" id="event-add">➕ Ajouter</div>
+                <div class="btn add event-add">➕ Ajouter</div>
+                <div class="btn edit event-edit-position hidden">📌 Changer la position</div>
+                <div id="position-msg"></div>
             </div>
             <div>
-                <div class="btn" id="events-reset">🗑️ Tout supprimer</div>
+                <div class="btn add events-reset">🗑️ Tout supprimer</div>
+                <div class="btn edit event-edit hidden">🖊️ Editer</div>
             </div>
 
             <hr>
@@ -74,7 +80,7 @@
                 <input type="checkbox" id="marker-blue" checked>En cours<br>
                 <input type="checkbox" id="marker-red" checked>Terminé<br>
 
-                <div class="btn" id="events-filter">🧷 Filtrer</div>
+                <div class="btn events-filter">🧷 Filtrer</div>
             </div>
 
             <hr>
