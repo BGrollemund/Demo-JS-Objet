@@ -6,6 +6,16 @@
         2.8796823,
         42.6962545
       ],
+      "style": {
+        "nature": {
+          "name": "Mapbox Outdoors",
+          "link": "mapbox://styles/mapbox/outdoors-v11"
+        },
+        "satellite": {
+          "name": "Mapbox Satellite Streets",
+          "link": "mapbox://styles/mapbox/satellite-streets-v11"
+        }
+      },
       "zoom": 8
     }
   },

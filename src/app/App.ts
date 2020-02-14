@@ -3,7 +3,7 @@ import config from '../../app.config.json';
 import jQuery from 'jquery';
 const $: JQueryStatic = jQuery;
 
-import mapboxgl, {LngLatLike, Map, MapboxOptions, MapMouseEvent, Marker, Popup} from "mapbox-gl";
+import mapboxgl, {LngLatLike, Map, MapboxOptions, MapMouseEvent, Marker, Popup, Style} from "mapbox-gl";
 
 import EventsStorage from "./EventsStorage";
 import EventData from "./EventData";
@@ -59,6 +59,7 @@ class App {
         if( eventTarget.classList.contains('event-add') ) this.onAddEvent();
         if( eventTarget.classList.contains('event-edit') ) this.onEditEvent();
         if( eventTarget.classList.contains('event-edit-position') ) this.onEditEventPosition();
+        if( eventTarget.classList.contains('event-edit-cancel') ) this.onEditEventCancel();
         if( eventTarget.classList.contains('events-reset') ) this.onResetEvents();
         if( eventTarget.classList.contains('events-filter') ) this.onFilterEvents();
     }
@@ -132,9 +133,11 @@ class App {
         this.eventsStorage.saveToLocalStorage();
         this.renderMarker( this.newEvent );
 
-        formFieldsManager.resetAddEventFields();
+        formFieldsManager.resetEventFields();
         this.$cmdPanelMask.hide();
     }
+
+    // Edit event
 
     /**
      * Edit event listener
@@ -149,10 +152,21 @@ class App {
         this.eventsStorage.editByIndex( this.currentMarkerIndex, editEvent );
         this.eventsStorage.saveToLocalStorage();
         this.placeMarkers[this.currentMarkerIndex].marker.remove();
+        this.placeMarkers.splice( this.currentMarkerIndex, 1 );
         this.renderMarker( editEvent );
-        formFieldsManager.resetAddEventFields();
+        formFieldsManager.resetEventFields();
         $('.add').show();
         $('.edit').hide();
+        this.$positionMsg.text('');
+    }
+
+    /**
+     * Cancel edit event listener
+     */
+    onEditEventCancel(): void {
+        formFieldsManager.resetEventFields();
+        $('.add').show();
+        $('.edit').hide()
         this.$positionMsg.text('');
     }
 
@@ -220,66 +234,13 @@ class App {
         const mapOptions: MapboxOptions = {
             center: config.api.mapboxgl.center as LngLatLike,
             container: 'map',
-            style: 'mapbox://styles/mapbox/outdoors-v11',
-            zoom: config.api.mapboxgl.zoom as number
+            style: config.api.mapboxgl.style.nature.link,
+            zoom: config.api.mapboxgl.zoom
         };
 
         mapboxgl.accessToken = config.api.mapboxgl.accessToken;
         this.map = new mapboxgl.Map( mapOptions );
         this.map.on('load', this.onMapLoad.bind(this));
-    }
-
-    /**
-     * Command map manager listener
-     *
-     * @param event
-     */
-    onCmdMap( event: MouseEvent ): void {
-        const eventTarget: HTMLDivElement = event.target as HTMLDivElement;
-
-        if( eventTarget.classList.contains('cmd-reload') ) this.onReloadMarkers();
-        if( eventTarget.classList.contains('cmd-recenter') ) this.onRecenterMap();
-        if( eventTarget.classList.contains('cmd-satellite') ) this.onSatelliteMap();
-        if( eventTarget.classList.contains('cmd-nature') ) this.onNatureMap();
-    }
-
-    /**
-     * Change style map in natural style
-     */
-    onNatureMap(): void {
-        this.$loader.show();
-        this.map.setStyle( 'mapbox://styles/mapbox/outdoors-v11' );
-        this.map.on('idle', () => this.$loader.fadeOut() );
-    }
-
-    /**
-     * Center map on initial center and zoom (available in config)
-     */
-    onRecenterMap(): void {
-        this.map.setCenter( [ config.api.mapboxgl.center[0], config.api.mapboxgl.center[1] ] );
-        this.map.setZoom( config.api.mapboxgl.zoom );
-    }
-
-    /**
-     * Reload markers (possible change in markers color)
-     */
-    onReloadMarkers(): void {
-        for( let coloredMarker of this.placeMarkers ) {
-            coloredMarker.marker.remove();
-        }
-
-        for( let eventData of this.eventsStorage.data ) {
-            this.renderMarker( eventData );
-        }
-    }
-
-    /**
-     * Change style map in satellite style
-     */
-    onSatelliteMap(): void {
-        this.$loader.show();
-        this.map.setStyle( 'mapbox://styles/mapbox/satellite-streets-v11' );
-        this.map.on('idle', () => this.$loader.fadeOut() );
     }
 
     /**
@@ -293,6 +254,8 @@ class App {
         }
         this.$loader.fadeOut();
     }
+
+    // Marker
 
     /**
      * Display a marker
@@ -320,7 +283,7 @@ class App {
                 <div class="popup-description">${eventData.description}</div>
                 <div class="btns-popup">
                     <div class="btn-popup edit" id="event-edit"><span class="edit">🖊️</span></div>
-                    <div class="btn-popup delete" id="event-delete"><span class="delete">❌</span></div>
+                    <div class="btn-popup delete" id="event-delete"><span class="delete">🗑️</span></div>
                 </div>
             </div>
         `);
@@ -386,6 +349,8 @@ class App {
         return result;
     }
 
+    // Popup
+
     /**
      * Add listeners on popup (edit and delete event) when is open
      *
@@ -421,7 +386,7 @@ class App {
         if( eventTarget.classList.contains('edit') ) {
             for( let i=0; i<this.placeMarkers.length; i++ ) {
                 if( this.placeMarkers[i].marker === marker ) {
-                    marker.togglePopup();
+                    marker.getPopup().remove();
                     $('.add').hide();
                     $('.edit').show();
                     formFieldsManager.setEditEventFields(this.eventsStorage.data[i]);
@@ -430,6 +395,65 @@ class App {
                     return;
                 }
             }
+        }
+    }
+
+    // ---- Map Menu ---- //
+
+    /**
+     * Command map manager listener
+     *
+     * @param event
+     */
+    onCmdMap( event: MouseEvent ): void {
+        const eventTarget: HTMLDivElement = event.target as HTMLDivElement;
+
+        if( eventTarget.classList.contains('cmd-reload') ) this.onReloadMarkers();
+        if( eventTarget.classList.contains('cmd-recenter') ) this.onRecenterMap();
+        if( eventTarget.classList.contains('cmd-satellite') ) this.onSatelliteMap();
+        if( eventTarget.classList.contains('cmd-nature') ) this.onNatureMap();
+    }
+
+    /**
+     * Change style map in natural style
+     */
+    onNatureMap(): void {
+        if( this.map.getStyle().name !== config.api.mapboxgl.style.nature.name ) {
+            this.$loader.show();
+            this.map.setStyle( config.api.mapboxgl.style.nature.link );
+            this.map.on('idle', () => this.$loader.fadeOut() );
+        }
+    }
+
+    /**
+     * Center map on initial center and zoom (available in config)
+     */
+    onRecenterMap(): void {
+        this.map.setCenter( [ config.api.mapboxgl.center[0], config.api.mapboxgl.center[1] ] );
+        this.map.setZoom( config.api.mapboxgl.zoom );
+    }
+
+    /**
+     * Reload markers (possible change in markers color)
+     */
+    onReloadMarkers(): void {
+        for( let coloredMarker of this.placeMarkers ) {
+            coloredMarker.marker.remove();
+        }
+
+        for( let eventData of this.eventsStorage.data ) {
+            this.renderMarker( eventData );
+        }
+    }
+
+    /**
+     * Change style map in satellite style
+     */
+    onSatelliteMap(): void {
+        if( this.map.getStyle().name !== config.api.mapboxgl.style.satellite.name ) {
+            this.$loader.show();
+            this.map.setStyle( config.api.mapboxgl.style.satellite.link );
+            this.map.on('idle', () => this.$loader.fadeOut() );
         }
     }
 }

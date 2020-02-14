@@ -122,9 +122,9 @@ class FormFieldsManager {
     }
 
     /**
-     * Reset add event form fields
+     * Reset event form fields
      */
-    resetAddEventFields() {
+    resetEventFields() {
         this.$eventTitle.val( '' );
         this.$eventDescription.val( '' );
         this.$eventDateStart.val( '' );
