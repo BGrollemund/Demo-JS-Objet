@@ -1,4 +1,7 @@
 @import url('~mapbox-gl/dist/mapbox-gl.css');
+@import "../../node_modules/@syncfusion/ej2-base/styles/material.css";
+@import "../../node_modules/@syncfusion/ej2-buttons/styles/material.css";
+@import "../../node_modules/@syncfusion/ej2-calendars/styles/material.css";
 
 * {
   border: 0;
@@ -13,6 +16,20 @@ body {
   height: 100vh;
   position: relative;
   z-index: 1;
+
+  #calendar {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 3px;
+    padding: 13px;
+    position: absolute;
+    right: 50px;
+    top: 50px;
+    z-index: 2;
+
+    .circle-red {
+      background: url("../assets/img/red-circle.png") center center no-repeat;
+    }
+  }
 
   #cmd-panel {
     background-color: #e5e5e5;

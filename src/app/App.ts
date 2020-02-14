@@ -3,7 +3,10 @@ import config from '../../app.config.json';
 import jQuery from 'jquery';
 const $: JQueryStatic = jQuery;
 
-import mapboxgl, {LngLatLike, Map, MapboxOptions, MapMouseEvent, Marker, Popup, Style} from "mapbox-gl";
+import mapboxgl, { LngLatLike, Map, MapboxOptions, MapMouseEvent, Marker, Popup } from "mapbox-gl";
+
+import {Calendar, RenderDayCellEventArgs} from '@syncfusion/ej2-calendars';
+import { loadCldr, L10n } from '@syncfusion/ej2-base';
 
 import EventsStorage from "./EventsStorage";
 import EventData from "./EventData";
@@ -17,6 +20,7 @@ class App {
     public $loader: JQuery;
     public $positionMsg: JQuery;
 
+    public calendar: Calendar;
     public currentMarkerIndex: number;
     public currentMarkerPosition: LngLatLike;
     public eventsStorage: EventsStorage;
@@ -40,8 +44,13 @@ class App {
         this.eventsStorage.fixturesLoad();
         this.eventsStorage = new EventsStorage( EventsStorage.getFromLocalStorage() );
 
-        // Initialize map and listeners
+        // Initialize calendar
+        this.initCalendar();
+
+        // Initialize map
         this.initMap();
+
+        // Initialize listeners
         this.$cmdPanel.on( 'click', this.onCmdPanel.bind( this ) );
         this.$cmdMap.on( 'click', this.onCmdMap.bind(this) );
     }
@@ -321,7 +330,9 @@ class App {
         const diffEndDateNow: number = eventData.date_end.getTime() - Date.now();
 
         if( diffStartDateNow > 0 ) {
+            // 86400000 = milliseconds by day
             const diffDaysStartDateNow: number = diffStartDateNow / 86400000;
+
             if( diffDaysStartDateNow >= 3 ) {
                 result.push( 'green', '' )
             }
@@ -454,6 +465,76 @@ class App {
             this.$loader.show();
             this.map.setStyle( config.api.mapboxgl.style.satellite.link );
             this.map.on('idle', () => this.$loader.fadeOut() );
+        }
+    }
+
+    // ---- Calendar ----
+
+    /**
+     * Init calendar
+     */
+    initCalendar(): void {
+        // Import french style for calendar
+        loadCldr(
+            require('cldr-data/supplemental/numberingSystems.json'),
+            require('cldr-data/main/fr/ca-gregorian.json'),
+            require('cldr-data/main/fr/numbers.json'),
+            require('cldr-data/main/fr/timeZoneNames.json'),
+            require('cldr-data/supplemental/weekdata.json')
+        );
+
+        L10n.load({
+            'fr': {
+                'calendar': { today: '' }
+            }
+        });
+
+        // Create calendar
+        this.calendar = new Calendar( {
+            renderDayCell: this.setDaysSelectedToCalendar,
+            locale: 'fr'
+        });
+
+        this.calendar.appendTo('#calendar');
+    }
+
+
+    // TODO
+    isEventOnDay( date: Date ) {
+        let dayWithEvent: Array<Date> = [];
+
+        this.eventsStorage.data.forEach( eventData =>  {
+            let
+                currentDate: Date = new Date( eventData.date_start.toDateString() ),
+                endDate: Date = new Date( eventData.date_end.toDateString() ),
+                i: number = 0;
+
+            while( currentDate <= endDate ) {
+                currentDate = new Date( currentDate.setDate( currentDate.getDate() + i ) );
+                dayWithEvent.push( currentDate );
+                i++;
+                console.log(currentDate);
+            }
+        });
+
+        // console.log(dayWithEvent);
+    }
+
+    /**
+     * Set style on days selected in the calendar
+     *
+     * @param day
+     */
+    setDaysSelectedToCalendar( day: RenderDayCellEventArgs ) {
+        // Disabled possibility for user to select a day
+        day.isDisabled = true;
+
+        // TODO
+        if( day.date ) {
+            // console.log( day.date.toDateString() );
+            if( day.date.getDate() === 22 ) {
+                if( day.element ) day.element.classList.add( 'circle-red' );
+            }
         }
     }
 }
