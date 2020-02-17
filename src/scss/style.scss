@@ -29,6 +29,10 @@ body {
     .circle-red {
       background: url("../assets/img/red-circle.png") center center no-repeat;
     }
+
+    .circle-red.e-other-month {
+      background: initial;
+    }
   }
 
   #cmd-panel {
@@ -91,6 +95,7 @@ body {
       color: #ff3449;
       margin-bottom: 7px;
       margin-top: -7px;
+      text-align: center;
     }
 
     .error-field {

@@ -21,6 +21,25 @@ export default class EventData {
     }
 
     /**
+     * Check if a date is between the eventData dates (without time issue)
+     *
+     * @param eventData
+     * @param date
+     */
+    static containsDate( eventData: EventData, date: Date ): boolean {
+        let
+            date_start: Date = new Date( eventData.date_start.toString() ),
+            date_end: Date = new Date( eventData.date_end.toString() );
+
+        date_start.setHours( 0 );
+        date_start.setMinutes( 0 );
+        date_end.setHours(0);
+        date_end.setMinutes(0);
+
+        return date >= date_start && date <= date_end;
+    }
+
+    /**
      * Convert date to string in friendly user format (static)
      *
      * @param date

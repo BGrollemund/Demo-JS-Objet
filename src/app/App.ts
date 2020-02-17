@@ -140,6 +140,7 @@ class App {
 
         this.eventsStorage.add( this.newEvent );
         this.eventsStorage.saveToLocalStorage();
+        this.calendar.refresh();
         this.renderMarker( this.newEvent );
 
         formFieldsManager.resetEventFields();
@@ -164,6 +165,7 @@ class App {
         this.placeMarkers.splice( this.currentMarkerIndex, 1 );
         this.renderMarker( editEvent );
         formFieldsManager.resetEventFields();
+        this.calendar.refresh();
         $('.add').show();
         $('.edit').hide();
         this.$positionMsg.text('');
@@ -194,7 +196,7 @@ class App {
      */
     onEditEventPositionMapPick( event: MapMouseEvent ): void {
         this.currentMarkerPosition = event.lngLat;
-        this.$positionMsg.text('Vous avez changé la position, appuyez sur "Editer" pour confirmer.');
+        this.$positionMsg.html('Vous avez changé la position.<br> Appuyez sur "Editer" pour confirmer.');
         this.$cmdPanelMask.hide();
     }
 
@@ -205,9 +207,11 @@ class App {
      */
     onResetEvents(): void {
         this.eventsStorage.reset();
+        this.calendar.refresh();
         for( let coloredMarker of this.placeMarkers ) {
             coloredMarker.marker.remove();
         }
+        this.placeMarkers = [];
     }
 
     // Filter events
@@ -388,6 +392,7 @@ class App {
                     this.placeMarkers.splice( i, 1 );
                     this.eventsStorage.deleteByIndex( i );
                     this.eventsStorage.saveToLocalStorage();
+                    this.calendar.refresh();
                     marker.remove();
                     return;
                 }
@@ -491,33 +496,11 @@ class App {
 
         // Create calendar
         this.calendar = new Calendar( {
-            renderDayCell: this.setDaysSelectedToCalendar,
+            renderDayCell: this.setDaysSelectedToCalendar.bind(this),
             locale: 'fr'
         });
 
         this.calendar.appendTo('#calendar');
-    }
-
-
-    // TODO
-    isEventOnDay( date: Date ) {
-        let dayWithEvent: Array<Date> = [];
-
-        this.eventsStorage.data.forEach( eventData =>  {
-            let
-                currentDate: Date = new Date( eventData.date_start.toDateString() ),
-                endDate: Date = new Date( eventData.date_end.toDateString() ),
-                i: number = 0;
-
-            while( currentDate <= endDate ) {
-                currentDate = new Date( currentDate.setDate( currentDate.getDate() + i ) );
-                dayWithEvent.push( currentDate );
-                i++;
-                console.log(currentDate);
-            }
-        });
-
-        // console.log(dayWithEvent);
     }
 
     /**
@@ -525,15 +508,14 @@ class App {
      *
      * @param day
      */
-    setDaysSelectedToCalendar( day: RenderDayCellEventArgs ) {
+    setDaysSelectedToCalendar( day: RenderDayCellEventArgs ): void {
         // Disabled possibility for user to select a day
         day.isDisabled = true;
 
-        // TODO
+        // Make style in day with event
         if( day.date ) {
-            // console.log( day.date.toDateString() );
-            if( day.date.getDate() === 22 ) {
-                if( day.element ) day.element.classList.add( 'circle-red' );
+            for( let eventData of this.eventsStorage.data ) {
+               if( day.element && EventData.containsDate( eventData, day.date ) ) day.element.classList.add( 'circle-red' );
             }
         }
     }
